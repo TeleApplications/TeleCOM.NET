@@ -10,4 +10,9 @@
     <PackageReference Include="System.IO.Ports" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Attributes\" />
+    <Folder Include="PortManager\Ports\" />
+  </ItemGroup>
+
 </Project>
