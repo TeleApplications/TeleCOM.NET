@@ -1,7 +1,7 @@
 ﻿
 namespace TeleCOM.NET.API.Interops.Enums
 {
-    //All of this window messages were imported
+    //All of these window messages were imported
     //from http://pinvoke.net/default.aspx/Constants.WM
     public enum WindowMessages 
     {
