@@ -7,6 +7,6 @@ namespace TeleCOM.NET.API.Interfaces
     {
         public WindowMessages PortMessage { get; }
 
-        public PortData Recieve(uint wParam);
+        public void Send(PortData data);
     }
 }

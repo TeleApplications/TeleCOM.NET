@@ -3,7 +3,7 @@ namespace TeleCOM.NET.API.Interops.Enums
 {
     //All of these window messages were imported
     //from http://pinvoke.net/default.aspx/Constants.WM
-    public enum WindowMessages 
+    public enum WindowMessages : uint
     {
          WM_ACTIVATE           = 0x0006,
          WM_ACTIVATEAPP        = 0x001C,
