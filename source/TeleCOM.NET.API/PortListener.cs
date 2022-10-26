@@ -2,7 +2,7 @@
 using System.Numerics;
 using TeleCOM.NET.API.Interfaces;
 using TeleCOM.NET.API.Interops;
-using TeleCOM.NET.API.Interops.Enums;
+using TeleCOM.NET.API.Interops.Structs;
 
 namespace TeleCOM.NET.API
 {
@@ -15,26 +15,29 @@ namespace TeleCOM.NET.API
         public bool IsRunning { get; protected set; } = true;
         public virtual ImmutableArray<IPortReciever> PortRecievers => portRecievers;
 
-        public PortListener(IntPtr handle) 
+        public PortListener()
         {
-            windowHandle = handle;
         }
 
         public async Task StartRecievingAsync() 
         {
             await Task.Run(async() =>
             {
-                while (IsRunning)
+                while (IsRunning) 
                 {
-                    var messageState = InteropManager.GetMessage(out var message, windowHandle, (uint)WindowMessages.WM_KEYDOWN, (uint)WindowMessages.WM_MOVING);
-                    if (messageState != 0) 
-                    {
-                        InteropManager.TranslateMessage(ref message);
-                        var port = GetCurrentPort(message.WParam);
-                        PortData data = port.Recieve(message.WParam);
+                    Message message = new();
 
+                    InteropManager.GetMessage(ref message, IntPtr.Zero - 1, 0, 0);
+                    InteropManager.TranslateMessage(ref message);
+
+                    var port = GetCurrentPort(message.MessageData);
+                    if (port is not null) 
+                    {
+                        PortData data = port.Recieve((uint)message.WParam);
                         await OnRecieve(data);
                     }
+
+                    InteropManager.DispatchMessage(ref message);
                 }
             });
         }
@@ -47,15 +50,17 @@ namespace TeleCOM.NET.API
             var vectorSize = Vector<uint>.Count;
 
             int difference = PortRecievers.Length - vectorSize;
+            int vectorizationCount = 0;
             for (int i = 0; i < difference; i+=vectorSize)
             {
                 IPortReciever currentPort = PortRecievers[i];
                 var portParameter = new Vector<uint>((uint)currentPort.PortMessage);
                 if (Vector.EqualsAll(vectorParameter, portParameter))
                     return currentPort;
+                vectorizationCount = i;
             }
 
-            for (int j = difference; j < PortRecievers.Length; j++)
+            for (int j = vectorizationCount; j < PortRecievers.Length; j++)
             {
                 IPortReciever currentPort = PortRecievers[j];
                 uint portParameter = (uint)currentPort.PortMessage;
