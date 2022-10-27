@@ -3,7 +3,7 @@ using TeleCOM.NET.API.Interops.Structs;
 
 namespace TeleCOM.NET.API.Interops
 {
-    internal static class InteropManager
+    public static class InteropManager
     {
         [DllImport("User32.dll")]
         public static extern int GetMessage(ref Message lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
@@ -13,5 +13,8 @@ namespace TeleCOM.NET.API.Interops
 
         [DllImport("User32.dll")]
         public static extern int DispatchMessage(ref Message lpMsg);
+
+        [DllImport("User32.dll")]
+        public static extern IntPtr SetParent(IntPtr hWnd, IntPtr parenthWnd);
     }
 }

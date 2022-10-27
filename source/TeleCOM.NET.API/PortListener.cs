@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Numerics;
 using TeleCOM.NET.API.Interfaces;
-using TeleCOM.NET.API.Interops;
 using TeleCOM.NET.API.Interops.Structs;
 
 namespace TeleCOM.NET.API
@@ -10,8 +9,8 @@ namespace TeleCOM.NET.API
     {
         private static readonly ImmutableArray<IPortReciever> portRecievers =
             ImmutableArray.CreateRange(GetAssemblyRecievers());
-        private IntPtr windowHandle;
 
+        public Message CurrentMessage { get; set; }
         public bool IsRunning { get; protected set; } = true;
         public virtual ImmutableArray<IPortReciever> PortRecievers => portRecievers;
 
@@ -25,19 +24,15 @@ namespace TeleCOM.NET.API
             {
                 while (IsRunning) 
                 {
-                    Message message = new();
+                    if (CurrentMessage.Handle == IntPtr.Zero)
+                        throw new Exception("Handle was not found");
 
-                    InteropManager.GetMessage(ref message, IntPtr.Zero - 1, 0, 0);
-                    InteropManager.TranslateMessage(ref message);
-
-                    var port = GetCurrentPort(message.MessageData);
+                    var port = GetCurrentPort(CurrentMessage.MessageData);
                     if (port is not null) 
                     {
-                        PortData data = port.Recieve((uint)message.WParam);
+                        PortData data = port.Recieve((uint)CurrentMessage.WParam);
                         await OnRecieve(data);
                     }
-
-                    InteropManager.DispatchMessage(ref message);
                 }
             });
         }
