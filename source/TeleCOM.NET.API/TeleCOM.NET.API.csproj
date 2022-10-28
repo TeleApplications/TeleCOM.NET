@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <Folder Include="Attributes\" />
-    <Folder Include="PortManager\Ports\" />
   </ItemGroup>
 
 </Project>

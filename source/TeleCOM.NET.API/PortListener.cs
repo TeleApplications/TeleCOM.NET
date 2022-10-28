@@ -1,6 +1,11 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Numerics;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using TeleCOM.NET.API.Interfaces;
+using TeleCOM.NET.API.Interops;
+using TeleCOM.NET.API.Interops.Enums;
 using TeleCOM.NET.API.Interops.Structs;
 
 namespace TeleCOM.NET.API
@@ -14,28 +19,30 @@ namespace TeleCOM.NET.API
         public bool IsRunning { get; protected set; } = true;
         public virtual ImmutableArray<IPortReciever> PortRecievers => portRecievers;
 
-        public PortListener()
+        protected IntPtr portProc { get; private set; }
+
+        public PortListener(uint handle, Module windowModule)
         {
+            var windowInstance = Marshal.GetHINSTANCE(windowModule);
+
+            //Setting the threadId to 0 is for now causing a big
+            //performance problem, in next update this will be fixed
+            //by fast way of finding id of current window handle
+            portProc = InteropManager.SetWindowsHookEx(13, OnPortHookProc, windowInstance, 0);
         }
 
-        public async Task StartRecievingAsync() 
+        private IntPtr OnPortHookProc(int code, IntPtr wParam, IntPtr lParam) 
         {
-            await Task.Run(async() =>
+            var port = GetCurrentPort((uint)wParam);
+            Debug.WriteLine($"Current WM_message: {(WindowMessages)wParam}");
+            if (port is not null) 
             {
-                while (IsRunning) 
-                {
-                    if (CurrentMessage.Handle == IntPtr.Zero)
-                        throw new Exception("Handle was not found");
+                PortData data = port.Recieve((uint)CurrentMessage.WParam);
+                Task.Run(async() => await OnRecieve(data));
+            }
 
-                    var port = GetCurrentPort(CurrentMessage.MessageData);
-                    if (port is not null) 
-                    {
-                        PortData data = port.Recieve((uint)CurrentMessage.WParam);
-                        await OnRecieve(data);
-                    }
-                }
-            });
-        }
+            return InteropManager.CallNextHookEx(portProc, (int)code, wParam, lParam);
+        } 
 
         public abstract Task OnRecieve(PortData data);
 
