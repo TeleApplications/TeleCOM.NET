@@ -7,6 +7,10 @@ namespace TeleCOM.NET.API.Interops
     public delegate IntPtr HookProc(int code, IntPtr wParam, IntPtr lParam);
     public static class InteropManager
     {
+
+        [DllImport("User32.dll")]
+        public static extern IntPtr SetParent(IntPtr hWnd, IntPtr parenthWnd);
+
         [DllImport("User32.dll")]
         public static extern IntPtr SetWindowsHookEx(uint hookType, HookProc lpfn, IntPtr hMod, uint dwThreadId);
 
