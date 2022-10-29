@@ -31,13 +31,15 @@ namespace TeleCOM.NET.API
             portProc = InteropManager.SetWindowsHookEx(13, OnPortHookProc, windowInstance, 0);
         }
 
-        private IntPtr OnPortHookProc(int code, IntPtr wParam, IntPtr lParam) 
+        private IntPtr OnPortHookProc(int code, IntPtr wParam, uint lParam) 
         {
             var port = GetCurrentPort((uint)wParam);
+
             Debug.WriteLine($"Current WM_message: {(WindowMessages)wParam}");
             if (port is not null) 
             {
-                PortData data = port.Recieve((uint)CurrentMessage.WParam);
+                var currentMessage = Marshal.PtrToStructure<Message>(new IntPtr(lParam));
+                PortData data = port.Recieve((uint)currentMessage.LParam);
                 Task.Run(async() => await OnRecieve(data));
             }
 

@@ -1,10 +1,8 @@
 ﻿using System.Runtime.InteropServices;
-using System.Text;
-using TeleCOM.NET.API.Interops.Structs;
 
 namespace TeleCOM.NET.API.Interops
 {
-    public delegate IntPtr HookProc(int code, IntPtr wParam, IntPtr lParam);
+    public delegate IntPtr HookProc(int code, IntPtr wParam, uint lParam);
     public static class InteropManager
     {
 
@@ -15,6 +13,6 @@ namespace TeleCOM.NET.API.Interops
         public static extern IntPtr SetWindowsHookEx(uint hookType, HookProc lpfn, IntPtr hMod, uint dwThreadId);
 
         [DllImport("User32.dll")]
-        public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+        public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, uint lParam);
     }
 }

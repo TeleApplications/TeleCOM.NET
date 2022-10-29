@@ -6,7 +6,7 @@ namespace TeleCOM.NET.Client.Ports
 {
     internal sealed class KeyboardPort : IPortReciever
     {
-        public WindowMessages PortMessage => WindowMessages.WM_SYSKEYDOWN;
+        public WindowMessages PortMessage => WindowMessages.WM_KEYDOWN;
 
         public PortData Recieve(uint wParam) => new((uint)PortMessage, wParam);
     }
